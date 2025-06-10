@@ -66,5 +66,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
 
+//okhttp
+    implementation(libs.okhttp)
+    implementation(libs.gson)
 }

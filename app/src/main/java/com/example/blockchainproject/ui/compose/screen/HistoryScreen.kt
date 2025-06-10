@@ -1,4 +1,4 @@
 package com.example.blockchainproject.ui.compose.screen
 
-class HomePage {
+class HistoryScreen {
 }
