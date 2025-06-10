@@ -1,4 +1,3 @@
-// com.example.blockchainproject.ui.compose.screen.LoginScreen.kt
 package com.example.blockchainproject.ui.compose.screen
 
 import androidx.compose.foundation.layout.Arrangement
@@ -21,32 +20,51 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.blockchainproject.ui.viewmodel.LoginViewModel
+import com.example.blockchainproject.ui.viewmodel.factory.LoginViewModelFactory
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    loginViewModel: LoginViewModel = viewModel()
+    loginViewModel: LoginViewModel = viewModel(factory = LoginViewModelFactory(LocalContext.current))
 ) {
     var address by remember { mutableStateOf("") }
     var isValidInputFormat by remember { mutableStateOf(true) }
 
     val isLoginSuccessful by loginViewModel.isLoginSuccessful.collectAsState()
     val isLoading by loginViewModel.isLoading.collectAsState()
+    val shouldLogout by loginViewModel.shouldLogout.collectAsState()
+
+    LaunchedEffect(Unit) {
+        val autoAddress = loginViewModel.autoLoginIfPossible()
+        if (autoAddress != null) {
+            navController.navigate("home") {
+                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            }
+        }
+    }
 
     LaunchedEffect(isLoginSuccessful) {
         if (isLoginSuccessful == true) {
             navController.navigate("home") {
-                popUpTo(navController.graph.startDestinationId) {
-                    inclusive = true
-                }
+                popUpTo(navController.graph.startDestinationId) { inclusive = true }
             }
             loginViewModel.resetLoginState()
         } else if (isLoginSuccessful == false) {
             isValidInputFormat = false
+        }
+    }
+
+    LaunchedEffect(shouldLogout) {
+        if (shouldLogout) {
+            navController.navigate("login") {
+                popUpTo("home") { inclusive = true }
+            }
+            loginViewModel.acknowledgeLogoutHandled()
         }
     }
 
@@ -79,7 +97,7 @@ fun LoginScreen(
         Button(
             onClick = {
                 if (address.startsWith("T") && address.length == 34) {
-                    loginViewModel.checkAccountAndLogin(address)
+                    loginViewModel.checkAccountAndLogin(address, save = true)
                 } else {
                     isValidInputFormat = false
                 }
