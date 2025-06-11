@@ -1,12 +1,18 @@
 package com.example.blockchainproject.ui.compose.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,8 +20,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.blockchainproject.ui.viewmodel.HomeViewModel
 import com.example.blockchainproject.ui.viewmodel.LoginViewModel
@@ -39,28 +48,69 @@ fun HomeScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFE0F7FA),
+                        Color(0xFFB2EBF2)
+                    )
+                )
+            )
+            .padding(24.dp)
+    ) {
+        GlassRedButton(
+            text = "Выйти",
+            onClick = { loginViewModel.logout() },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+        )
+
         if (accountInfo == null && isLoading) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
             accountInfo?.let { info ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Баланс: ${info.balance / 1_000_000.0} TRX")
-                    Text("Имя аккаунта: ${info.name ?: "Не указано"}")
-                    Text("Количество транзакций: ${info.totalTransactions}")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { homeViewModel.reloadManually() }) {
-                        Text("Обновить")
-                    }
-                    if (isLoading) {
-                        CircularProgressIndicator()
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { loginViewModel.logout() }) {
-                        Text("Выйти")
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White.copy(alpha = 0.15f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "Баланс: ${info.balance / 1_000_000.0} TRX",
+                            fontSize = 20.sp
+                        )
+                        Text(
+                            "Имя аккаунта: ${info.name ?: "Не указано"}",
+                            fontSize = 20.sp
+                        )
+                        Text(
+                            "Количество транзакций: ${info.totalTransactions}",
+                            fontSize = 20.sp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        GlassRedButton(
+                            text = "Обновить",
+                            onClick = { homeViewModel.reloadManually() },
+                            loading = isLoading,
+                            modifier = Modifier.fillMaxWidth()
+
+                        )
                     }
                 }
-            } ?: Text("Нет сохранённых данных")
+            } ?: Text("Нет сохранённых данных", modifier = Modifier.align(Alignment.Center))
         }
     }
 }
