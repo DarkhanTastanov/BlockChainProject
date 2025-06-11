@@ -20,11 +20,36 @@ class HomeViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    fun loadAccountData() {
+    init {
+        loadCachedData()
+        refreshInBackground()
+    }
+
+    private fun loadCachedData() {
+        val cached = sharedPrefs.getSavedAccountInfo()
+        _accountInfo.value = cached
+    }
+
+    private fun refreshInBackground() {
+        val address = sharedPrefs.getSavedAddress() ?: return
+        viewModelScope.launch {
+            val freshData = repository.fetchAccountInfo(address)
+            if (freshData != null && freshData != _accountInfo.value) {
+                sharedPrefs.saveAccountInfo(freshData)
+                _accountInfo.value = freshData
+            }
+        }
+    }
+
+    fun reloadManually() {
         val address = sharedPrefs.getSavedAddress() ?: return
         _isLoading.value = true
         viewModelScope.launch {
-            _accountInfo.value = repository.fetchAccountInfo(address)
+            val freshData = repository.fetchAccountInfo(address)
+            if (freshData != null) {
+                sharedPrefs.saveAccountInfo(freshData)
+                _accountInfo.value = freshData
+            }
             _isLoading.value = false
         }
     }

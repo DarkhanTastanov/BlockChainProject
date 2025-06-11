@@ -27,12 +27,8 @@ fun HomeScreen(
     val accountInfo by homeViewModel.accountInfo.collectAsState()
     val isLoading by homeViewModel.isLoading.collectAsState()
 
-    LaunchedEffect(Unit) {
-        homeViewModel.loadAccountData()
-    }
-
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        if (isLoading) {
+        if (accountInfo == null && isLoading) {
             CircularProgressIndicator()
         } else {
             accountInfo?.let { info ->
@@ -41,11 +37,14 @@ fun HomeScreen(
                     Text("Имя аккаунта: ${info.name ?: "Не указано"}")
                     Text("Количество транзакций: ${info.totalTransactions}")
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { homeViewModel.loadAccountData() }) {
+                    Button(onClick = { homeViewModel.reloadManually() }) {
                         Text("Обновить")
                     }
+                    if (isLoading){
+                        CircularProgressIndicator()
+                    }
                 }
-            } ?: Text("Ошибка загрузки данных")
+            } ?: Text("Нет сохранённых данных")
         }
     }
 }
