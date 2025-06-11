@@ -150,3 +150,36 @@ fun GlassOutlinedTextField(
     )
 }
 
+@Composable
+fun GlassCard(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    val shape = RoundedCornerShape(16.dp)
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .background(Color.Transparent)
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFFFF4444),
+                        Color(0xFFFF8888)
+                    )
+                ),
+                shape = shape
+            )
+    ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(shape)
+                .blur(12.dp)
+                .background(Color.Red.copy(alpha = 0.07f))
+        )
+        Box(modifier = Modifier.padding(16.dp)) {
+            content()
+        }
+    }
+}

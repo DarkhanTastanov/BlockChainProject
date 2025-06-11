@@ -1,8 +1,10 @@
 package com.example.blockchainproject.ui.compose.screen
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +29,8 @@ import com.example.blockchainproject.ui.viewmodel.HistoryViewModel
 import com.example.blockchainproject.ui.viewmodel.factory.HistoryViewModelFactory
 import java.util.Date
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun HistoryScreen(
@@ -40,40 +44,63 @@ fun HistoryScreen(
     LaunchedEffect(Unit) {
         viewModel.loadTransactions()
     }
-
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-            listOf("all", "incoming", "outgoing").forEach { type ->
-                Button(onClick = { viewModel.setFilter(type) }) {
-                    Text(type.capitalize())
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFE0F7FA),
+                        Color(0xFFB2EBF2)
+                    )
+                )
+            )
+            .padding(24.dp)
+    ){
+        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                listOf("all", "incoming", "outgoing").forEach { type ->
+                    GlassRedButton(
+                        text = type.replaceFirstChar { it.uppercase() },
+                        onClick = { viewModel.setFilter(type) },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
-        }
 
-        if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-        } else {
-            LazyColumn {
-                items(transactions) { tx ->
-                    AnimatedVisibility(visible = true) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                                .clickable {
-                                    navController.navigate("transaction_details/${tx.hash}")
+
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            } else {
+                LazyColumn {
+                    items(transactions) { tx ->
+                        AnimatedVisibility(visible = true) {
+                            GlassCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp)
+                                    .clickable {
+                                        val address = if (tx.type == "incoming") tx.fromAddress else tx.toAddress
+                                        navController.navigate("transaction_details/${address}/${tx.hash}")
+                                    }
+
+                            ) {
+                                Column {
+                                    Text("Hash: ${tx.hash.take(12)}...", color = Color.Black)
+                                    Text("Amount: ${tx.amount / 1_000_000.0} TRX", color = Color.Black)
+                                    Text("Type: ${tx.type}", color = Color.Black)
+                                    Text("Date: ${Date(tx.timestamp)}", color = Color.Black)
                                 }
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text("Hash: ${tx.hash.take(12)}...")
-                                Text("Amount: ${tx.amount / 1_000_000.0} TRX")
-                                Text("Type: ${tx.type}")
-                                Text("Date: ${Date(tx.timestamp).toString()}")
                             }
                         }
                     }
                 }
+
             }
         }
     }
+
 }

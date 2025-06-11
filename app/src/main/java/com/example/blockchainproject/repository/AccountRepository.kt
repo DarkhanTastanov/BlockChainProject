@@ -88,11 +88,17 @@ class AccountRepository {
                 val param = contract?.optJSONObject("parameter")?.optJSONObject("value") ?: return@mapNotNull null
                 val value = param.optLong("amount", 0L)
                 val toAddress = param.optString("to_address", "")
+                val fromAddress = param.optString("from_address", "")
                 val isIncoming = toAddress == address
-                Transaction(hash, value, if (isIncoming) "outgoing" else "incoming", timestamp)
+                Transaction(
+                    hash = hash,
+                    amount = value,
+                    type = if (isIncoming) "incoming" else "outgoing",
+                    timestamp = timestamp,
+                    toAddress = toAddress,
+                    fromAddress = fromAddress
+                )
             }
         }
     }
-
-
 }

@@ -1,62 +1,105 @@
 package com.example.blockchainproject.ui.compose.navigation
 
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-import com.example.blockchainproject.ui.compose.screen.HistoryScreen
-import com.example.blockchainproject.ui.compose.screen.HomeScreen
-import com.example.blockchainproject.ui.compose.screen.LoginScreen
-import com.example.blockchainproject.ui.compose.screen.TransactionDetailsScreen
+import com.example.blockchainproject.ui.compose.screen.*
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val pageBackgroundColor = Color(0xFFB2EBF2)
 
     Scaffold(
         bottomBar = {
             if (currentRoute != "login") {
                 BottomNavigationBar(navController)
-            }        }
+            }
+        },
+        containerColor = pageBackgroundColor
     ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = "login",
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            enterTransition = { getEnterTransition(initialState, targetState) },
+            exitTransition = { getExitTransition(initialState, targetState) },
+            popEnterTransition = { getPopEnterTransition(initialState, targetState) },
+            popExitTransition = { getPopExitTransition(initialState, targetState) }
         ) {
             composable("login") {
                 LoginScreen(navController)
             }
-
-            composable("home") { HomeScreen(
-                onLogout = {
+            composable("home") {
+                HomeScreen(onLogout = {
                     navController.navigate("login") {
                         popUpTo("home") { inclusive = true }
                     }
-                }
-            ) }
-            composable("history") { HistoryScreen(navController) }
+                })
+            }
+            composable("history") {
+                HistoryScreen(navController)
+            }
             composable(
-                "transaction_details/{hash}",
-                arguments = listOf(navArgument("hash") { type = NavType.StringType }),
-                enterTransition = { fadeIn() + slideInHorizontally() },
-                exitTransition = { fadeOut() + slideOutHorizontally() }
+                "transaction_details/{address}/{hash}",
+                arguments = listOf(
+                    navArgument("address") { type = NavType.StringType },
+                    navArgument("hash") { type = NavType.StringType }
+                )
             ) {
                 val hash = it.arguments?.getString("hash") ?: ""
-                TransactionDetailsScreen(hash)
+                val address = it.arguments?.getString("address") ?: ""
+                TransactionDetailsScreen(hash, address)
             }
 
         }
     }
+}
+
+private fun getEnterTransition(initial: NavBackStackEntry, target: NavBackStackEntry): EnterTransition {
+    return when {
+        target.destination.route?.startsWith("transaction_details") == true -> {
+            scaleIn(initialScale = 0.8f, animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
+        }
+        initial.destination.route == "home" && target.destination.route == "history" -> {
+            slideInHorizontally(initialOffsetX = { it }) + fadeIn(animationSpec = tween(300))
+        }
+        initial.destination.route == "history" && target.destination.route == "home" -> {
+            slideInHorizontally(initialOffsetX = { -it }) + fadeIn(animationSpec = tween(300))
+        }
+        else -> fadeIn(animationSpec = tween(300))
+    }
+}
+
+private fun getExitTransition(initial: NavBackStackEntry, target: NavBackStackEntry): ExitTransition {
+    return when {
+        initial.destination.route?.startsWith("transaction_details") == true -> {
+            scaleOut(targetScale = 0.8f, animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+        }
+        initial.destination.route == "home" && target.destination.route == "history" -> {
+            slideOutHorizontally(targetOffsetX = { -it }) + fadeOut(animationSpec = tween(300))
+        }
+        initial.destination.route == "history" && target.destination.route == "home" -> {
+            slideOutHorizontally(targetOffsetX = { it }) + fadeOut(animationSpec = tween(300))
+        }
+        else -> fadeOut(animationSpec = tween(300))
+    }
+}
+
+
+private fun getPopEnterTransition(initial: NavBackStackEntry, target: NavBackStackEntry): EnterTransition {
+    return getEnterTransition(initial, target)
+}
+
+private fun getPopExitTransition(initial: NavBackStackEntry, target: NavBackStackEntry): ExitTransition {
+    return getExitTransition(initial, target)
 }
