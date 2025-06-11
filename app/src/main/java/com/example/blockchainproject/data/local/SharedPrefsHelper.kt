@@ -59,4 +59,8 @@ class SharedPrefsHelper(context: Context) {
         }
     }
 
+    fun clearAll() {
+        prefs.edit().clear().apply()
+    }
+
 }

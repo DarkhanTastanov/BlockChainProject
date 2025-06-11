@@ -39,7 +39,13 @@ fun AppNavigation() {
                 LoginScreen(navController)
             }
 
-            composable("home") { HomeScreen() }
+            composable("home") { HomeScreen(
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                }
+            ) }
             composable("history") { HistoryScreen(navController) }
             composable(
                 "transaction_details/{hash}",

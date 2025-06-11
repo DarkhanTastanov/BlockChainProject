@@ -62,4 +62,11 @@ class LoginViewModel(
     fun acknowledgeLogoutHandled() {
         _shouldLogout.value = false
     }
+
+    fun logout() {
+        sharedPrefs.clearAll()
+        _isLoginSuccessful.value = null
+        _shouldLogout.value = true
+    }
+
 }

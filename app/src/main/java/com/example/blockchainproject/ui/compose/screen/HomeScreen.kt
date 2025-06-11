@@ -18,14 +18,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.blockchainproject.ui.viewmodel.HomeViewModel
+import com.example.blockchainproject.ui.viewmodel.LoginViewModel
 import com.example.blockchainproject.ui.viewmodel.factory.HomeViewModelFactory
+import com.example.blockchainproject.ui.viewmodel.factory.LoginViewModelFactory
 
 @Composable
 fun HomeScreen(
-    homeViewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(LocalContext.current))
+    homeViewModel: HomeViewModel = viewModel(factory = HomeViewModelFactory(LocalContext.current)),
+    loginViewModel: LoginViewModel = viewModel(factory = LoginViewModelFactory(LocalContext.current)),
+    onLogout: () -> Unit
 ) {
     val accountInfo by homeViewModel.accountInfo.collectAsState()
     val isLoading by homeViewModel.isLoading.collectAsState()
+    val shouldLogout by loginViewModel.shouldLogout.collectAsState()
+
+    LaunchedEffect(shouldLogout) {
+        if (shouldLogout) {
+            loginViewModel.acknowledgeLogoutHandled()
+            onLogout()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (accountInfo == null && isLoading) {
@@ -40,8 +52,12 @@ fun HomeScreen(
                     Button(onClick = { homeViewModel.reloadManually() }) {
                         Text("Обновить")
                     }
-                    if (isLoading){
+                    if (isLoading) {
                         CircularProgressIndicator()
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { loginViewModel.logout() }) {
+                        Text("Выйти")
                     }
                 }
             } ?: Text("Нет сохранённых данных")
