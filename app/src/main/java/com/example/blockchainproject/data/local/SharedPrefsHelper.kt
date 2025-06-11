@@ -3,7 +3,9 @@ package com.example.blockchainproject.data.local
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.blockchainproject.data.entity.AccountInfo
+import com.example.blockchainproject.data.entity.Transaction
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class SharedPrefsHelper(context: Context) {
 
@@ -41,4 +43,20 @@ class SharedPrefsHelper(context: Context) {
             null
         }
     }
+
+    fun saveTransactions(transactions: List<Transaction>) {
+        val json = gson.toJson(transactions)
+        prefs.edit().putString("cached_transactions", json).apply()
+    }
+
+    fun getSavedTransactions(): List<Transaction> {
+        val json = prefs.getString("cached_transactions", null) ?: return emptyList()
+        return try {
+            val type = object : TypeToken<List<Transaction>>() {}.type
+            gson.fromJson(json, type)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
 }

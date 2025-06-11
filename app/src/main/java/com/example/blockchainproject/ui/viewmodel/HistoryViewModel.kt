@@ -27,14 +27,30 @@ class HistoryViewModel(
     private val _filter = MutableStateFlow("all")
     val filter: StateFlow<String> = _filter
 
-    fun loadTransactions() {
+    init {
+        loadCachedTransactions()
+        refreshInBackground()
+    }
+
+    private fun loadCachedTransactions() {
+        _transactions.value = sharedPrefs.getSavedTransactions()
+    }
+
+    private fun refreshInBackground() {
         val address = sharedPrefs.getSavedAddress() ?: return
-        _isLoading.value = true
         viewModelScope.launch {
-            val txs = repository.getTransactions(address)
-            _transactions.value = txs
+            _isLoading.value = true
+            val freshData = repository.getTransactions(address)
+            if (freshData != _transactions.value) {
+                sharedPrefs.saveTransactions(freshData)
+                _transactions.value = freshData
+            }
             _isLoading.value = false
         }
+    }
+
+    fun loadTransactions() {
+        refreshInBackground()
     }
 
     fun setFilter(type: String) {
@@ -42,12 +58,12 @@ class HistoryViewModel(
     }
 
     fun filteredTransactions(): StateFlow<List<Transaction>> {
-        return combine(_transactions, _filter) { txs, filter ->
-            when (filter) {
-                "incoming" -> txs.filter { it.type == "incoming" }
-                "outgoing" -> txs.filter { it.type == "outgoing" }
-                else -> txs
+        return combine(transactions, filter) { list, f ->
+            when (f) {
+                "incoming" -> list.filter { it.type == "incoming" }
+                "outgoing" -> list.filter { it.type == "outgoing" }
+                else -> list
             }
-        }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
     }
 }

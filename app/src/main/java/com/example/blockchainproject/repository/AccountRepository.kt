@@ -89,7 +89,7 @@ class AccountRepository {
                 val value = param.optLong("amount", 0L)
                 val toAddress = param.optString("to_address", "")
                 val isIncoming = toAddress == address
-                Transaction(hash, value, if (isIncoming) "incoming" else "outgoing", timestamp)
+                Transaction(hash, value, if (isIncoming) "outgoing" else "incoming", timestamp)
             }
         }
     }
