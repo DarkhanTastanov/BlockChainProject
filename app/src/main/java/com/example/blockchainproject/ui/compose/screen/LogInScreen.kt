@@ -3,26 +3,20 @@ package com.example.blockchainproject.ui.compose.screen
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -72,65 +66,205 @@ fun LoginScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFE0F7FA),
+                        Color(0xFFB2EBF2)
+                    )
+                )
+            )
+            .padding(24.dp)
     ) {
-        OutlinedTextField(
-            value = address,
-            onValueChange = {
-                address = it
-                isValidInputFormat = it.isEmpty() || (it.startsWith("T") && it.length == 34)
-                if (isLoginSuccessful == false && isValidInputFormat) {
-                    loginViewModel.resetLoginState()
-                }
-            },
-            label = { Text("Tron Address") },
-            isError = !isValidInputFormat,
-            supportingText = {
-                if (!isValidInputFormat) {
-                    Text("Invalid Tron address format or account not found.")
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    data = Uri.parse("tronlink://wallet")
-                }
-                try {
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    Toast.makeText(context, "TronLink app not found", Toast.LENGTH_SHORT).show()
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
+                .blur(0.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White.copy(alpha = 0.15f)
+            )
         ) {
-            Text("Open TronLink Wallet")
-        }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                if (address.startsWith("T") && address.length == 34) {
-                    loginViewModel.checkAccountAndLogin(address, save = true)
-                } else {
-                    isValidInputFormat = false
-                }
-            },
-            enabled = !isLoading && isValidInputFormat && address.isNotEmpty(),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.height(24.dp))
-            } else {
-                Text("Log In")
+                GlassOutlinedTextField(
+                    value = address,
+                    onValueChange = {
+                        address = it
+                        isValidInputFormat = it.isEmpty() || (it.startsWith("T") && it.length == 34)
+                        if (isLoginSuccessful == false && isValidInputFormat) {
+                            loginViewModel.resetLoginState()
+                        }
+                    },
+                    label = "Tron Address",
+                    isError = !isValidInputFormat,
+                    isValid = isValidInputFormat && address.isNotEmpty(),
+                    supportingText = if (!isValidInputFormat) "Invalid Tron address format or account not found." else null,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                GlassRedButton(
+                    text = "Open TronLink Wallet",
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            data = Uri.parse("tronlink://wallet")
+                        }
+                        try {
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "TronLink app not found", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                GlassRedButton(
+                    text = "Log In",
+                    onClick = {
+                        if (address.startsWith("T") && address.length == 34) {
+                            loginViewModel.checkAccountAndLogin(address, save = true)
+                        } else {
+                            isValidInputFormat = false
+                        }
+                    },
+                    enabled = !isLoading && isValidInputFormat && address.isNotEmpty(),
+                    loading = isLoading,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
             }
         }
     }
 }
+
+
+@Composable
+fun GlassRedButton(
+    text: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    loading: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(12.dp)
+
+    Box(
+        modifier = modifier
+            .graphicsLayer {
+                alpha = if (enabled) 1f else 0.5f
+            }
+            .clip(shape)
+            .background(Color.Transparent)
+            .border(
+                width = 2.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFFFF4444),
+                        Color(0xFFFF8888),
+                        Color(0xFFFF4444)
+                    )
+                ),
+                shape = shape
+            )
+    ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(shape)
+                .blur(10.dp)
+                .background(Color.Red.copy(alpha = 0.15f))
+                .clickable(enabled = enabled, onClick = onClick),
+
+            )
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(vertical = 12.dp, horizontal = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = Color(0xFFFF4444),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = text,
+                    color = Color(0xFFFF4444),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun GlassOutlinedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    isError: Boolean,
+    isValid: Boolean,
+    supportingText: String?,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(12.dp)
+
+    val focusedBorderColor = when {
+        isError -> Color(0xFFFF4444)
+        isValid -> Color(0xFF4CAF50)
+        value.isEmpty() -> Color.White
+        else -> MaterialTheme.colorScheme.primary
+    }
+
+    val unfocusedBorderColor = when {
+        isError -> Color(0xFFFF8888)
+        isValid -> Color(0xFF81C784)
+        value.isEmpty() -> Color.White
+        else -> MaterialTheme.colorScheme.outline
+    }
+    Box(
+        modifier = Modifier
+            .clip(shape)
+            .blur(10.dp)
+            .background(Color.White.copy(alpha = 0.15f))
+    )
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        isError = isError,
+        supportingText = {
+            if (isError && supportingText != null) {
+                Text(supportingText)
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth(),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = focusedBorderColor,
+            unfocusedBorderColor = unfocusedBorderColor,
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            errorBorderColor = Color(0xFFFF4444),
+            errorContainerColor = Color.Transparent,
+            focusedLabelColor = Color.Black,
+            unfocusedLabelColor = Color.Black,
+            ),
+        shape = shape
+    )
+}
+
