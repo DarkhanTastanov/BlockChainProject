@@ -70,53 +70,29 @@ class AccountRepository {
         }
     }
 
-    suspend fun getTransactions(address: String): List<Transaction> {
-        return withContext(Dispatchers.IO) {
-            val body = mapOf(
-                "account" to address,
-                "limit" to 20,
-                "reverse" to true
-            )
-            val requestBody = gson.toJson(body).toRequestBody(jsonMediaType)
+    suspend fun getTransactions(address: String): List<Transaction> = withContext(Dispatchers.IO) {
+        val url = "https://nile.trongrid.io/v1/accounts/$address/transactions?only_confirmed=true"
+        val request = Request.Builder().url(url).build()
 
-            val request = Request.Builder()
-                .url("https://nile.trongrid.io/wallet/gettransactionsrelated")
-                .post(requestBody)
-                .addHeader("accept", "application/json")
-                .addHeader("content-type", "application/json")
-                .build()
-
-            try {
-                val response = client.newCall(request).execute()
-                if (response.isSuccessful) {
-                    response.body?.string()?.let { json ->
-                        val jsonObject = JSONObject(json)
-                        val txArray = jsonObject.optJSONArray("transaction") ?: return@withContext emptyList()
-                        (0 until txArray.length()).mapNotNull { i ->
-                            val tx = txArray.getJSONObject(i)
-                            val rawData = tx.getJSONObject("raw_data")
-                            val contract = rawData.getJSONArray("contract").getJSONObject(0)
-                            val parameter = contract.getJSONObject("parameter").getJSONObject("value")
-
-                            val toAddress = parameter.optString("to_address")
-                            val ownerAddress = parameter.optString("owner_address")
-                            val value = parameter.optLong("amount", 0L)
-                            val type = if (toAddress == address) "incoming" else "outgoing"
-                            val timestamp = rawData.optLong("timestamp", System.currentTimeMillis())
-
-                            Transaction(
-                                hash = tx.optString("txID"),
-                                amount = value,
-                                type = type,
-                                timestamp = timestamp
-                            )
-                        }
-                    } ?: emptyList()
-                } else emptyList()
-            } catch (e: Exception) {
-                emptyList()
+        client.newCall(request).execute().use { resp ->
+            if (!resp.isSuccessful) return@withContext emptyList()
+            val json = JSONObject(resp.body?.string().orEmpty())
+            val arr = json.optJSONArray("data") ?: return@withContext emptyList()
+            (0 until arr.length()).mapNotNull { i ->
+                val tx = arr.getJSONObject(i)
+                val hash = tx.optString("txID", "")
+                val timestamp = tx.optLong("block_timestamp", 0L)
+                val type = tx.optString("type", "")
+                val raw = tx.optJSONObject("raw_data") ?: return@mapNotNull null
+                val contract = raw.optJSONArray("contract")?.optJSONObject(0)
+                val param = contract?.optJSONObject("parameter")?.optJSONObject("value") ?: return@mapNotNull null
+                val value = param.optLong("amount", 0L)
+                val toAddress = param.optString("to_address", "")
+                val isIncoming = toAddress == address
+                Transaction(hash, value, if (isIncoming) "incoming" else "outgoing", timestamp)
             }
         }
     }
+
 
 }
