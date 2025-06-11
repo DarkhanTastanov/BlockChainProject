@@ -1,5 +1,8 @@
 package com.example.blockchainproject.ui.compose.screen
 
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -34,6 +37,7 @@ fun LoginScreen(
 ) {
     var address by remember { mutableStateOf("") }
     var isValidInputFormat by remember { mutableStateOf(true) }
+    val context = LocalContext.current
 
     val isLoginSuccessful by loginViewModel.isLoginSuccessful.collectAsState()
     val isLoading by loginViewModel.isLoading.collectAsState()
@@ -93,6 +97,23 @@ fun LoginScreen(
             },
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse("tronlink://wallet")
+                }
+                try {
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(context, "TronLink app not found", Toast.LENGTH_SHORT).show()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Open TronLink Wallet")
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {

@@ -56,6 +56,7 @@ fun AppNavigation() {
                 val hash = it.arguments?.getString("hash") ?: ""
                 TransactionDetailsScreen(hash)
             }
+
         }
     }
 }
