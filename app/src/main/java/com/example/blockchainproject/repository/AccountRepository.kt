@@ -93,7 +93,7 @@ class AccountRepository {
                 Transaction(
                     hash = hash,
                     amount = value,
-                    type = if (isIncoming) "incoming" else "outgoing",
+                    type = if (isIncoming) "outgoing" else "incoming",
                     timestamp = timestamp,
                     toAddress = toAddress,
                     fromAddress = fromAddress

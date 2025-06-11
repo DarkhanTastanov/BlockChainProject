@@ -83,7 +83,7 @@ fun HistoryScreen(
                                     .fillMaxWidth()
                                     .padding(vertical = 6.dp)
                                     .clickable {
-                                        val address = if (tx.type == "incoming") tx.fromAddress else tx.toAddress
+                                        val address = if (tx.type == "incoming") tx.toAddress else tx.fromAddress
                                         navController.navigate("transaction_details/${address}/${tx.hash}")
                                     }
 
