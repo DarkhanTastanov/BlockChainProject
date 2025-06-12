@@ -20,12 +20,36 @@ class TransactionDetailsViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+//    fun loadTransactionByHash(address: String, hash: String) {
+//        viewModelScope.launch {
+//            val cached = sharedPrefs.getSavedTransactions()
+//            val cachedTx = cached.find { it.hash == hash }
+//            if (cachedTx != null) {
+//                _transaction.value = cachedTx
+//                return@launch
+//            }
+//
+//            _isLoading.value = true
+//            val fresh = repository.getTransactions(address)
+//            val match = fresh.find { it.hash == hash }
+//            if (match != null) {
+//                sharedPrefs.saveTransactions(fresh)
+//                _transaction.value = match
+//            }
+//            _isLoading.value = false
+//        }
+//    }
+
+    private val _transactionUrl = MutableStateFlow<String?>(null)
+    val transactionUrl: StateFlow<String?> = _transactionUrl
+
     fun loadTransactionByHash(address: String, hash: String) {
         viewModelScope.launch {
             val cached = sharedPrefs.getSavedTransactions()
             val cachedTx = cached.find { it.hash == hash }
             if (cachedTx != null) {
                 _transaction.value = cachedTx
+                _transactionUrl.value = generateTransactionUrl(cachedTx.hash)
                 return@launch
             }
 
@@ -35,9 +59,14 @@ class TransactionDetailsViewModel(
             if (match != null) {
                 sharedPrefs.saveTransactions(fresh)
                 _transaction.value = match
+                _transactionUrl.value = generateTransactionUrl(match.hash)
             }
             _isLoading.value = false
         }
+    }
+
+    private fun generateTransactionUrl(hash: String): String {
+        return "https://nile.tronscan.org/#/transaction/$hash"
     }
 
 }

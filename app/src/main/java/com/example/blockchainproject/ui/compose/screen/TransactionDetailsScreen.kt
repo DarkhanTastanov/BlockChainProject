@@ -39,7 +39,9 @@ fun TransactionDetailsScreen(hash: String, address: String) {
         viewModel.loadTransactionByHash(address, hash)
     }
 
-    val url = "https://nile.tronscan.org/#/transaction/$hash"
+//    val url = "https://nile.tronscan.org/#/transaction/$hash"
+    val transactionUrl by viewModel.transactionUrl.collectAsState()
+
     val baseGlassColor = Color(0xFFB2EBF2)
     val borderColors = listOf(
         Color(0xFFFF4444),
@@ -83,8 +85,12 @@ fun TransactionDetailsScreen(hash: String, address: String) {
 
         Button(
             onClick = {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                context.startActivity(intent)
+//                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+//                context.startActivity(intent)
+                transactionUrl?.let {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
+                    context.startActivity(intent)
+                }
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF4444))
         ) {
