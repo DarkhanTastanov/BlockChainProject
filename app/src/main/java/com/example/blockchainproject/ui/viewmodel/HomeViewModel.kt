@@ -28,6 +28,7 @@ class HomeViewModel(
     private fun loadCachedData() {
         val cached = sharedPrefs.getSavedAccountInfo()
         _accountInfo.value = cached
+        _isLoading.value = true
     }
 
     private fun refreshInBackground() {
@@ -38,6 +39,8 @@ class HomeViewModel(
                 sharedPrefs.saveAccountInfo(freshData)
                 _accountInfo.value = freshData
             }
+            _isLoading.value = false
+
         }
     }
 
