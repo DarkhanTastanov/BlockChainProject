@@ -69,7 +69,8 @@ fun HomeScreen(
         )
 
         if (accountInfo == null && isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center),
+                color =Color(0xFFFF4444))
         } else {
             accountInfo?.let { info ->
                 Card(

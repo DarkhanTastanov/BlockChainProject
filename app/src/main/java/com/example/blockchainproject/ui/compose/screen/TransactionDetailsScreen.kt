@@ -70,7 +70,7 @@ fun TransactionDetailsScreen(hash: String, address: String) {
         Spacer(modifier = Modifier.height(16.dp))
 
         if (isLoading) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(color =Color(0xFFFF4444))
         } else {
             transaction?.let {
                 DetailRow("Hash", it.hash)

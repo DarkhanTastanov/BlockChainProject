@@ -73,7 +73,11 @@ fun HistoryScreen(
 
 
             if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                    color =Color(0xFFFF4444)
+                    )
             } else {
                 LazyColumn {
                     items(transactions) { tx ->
