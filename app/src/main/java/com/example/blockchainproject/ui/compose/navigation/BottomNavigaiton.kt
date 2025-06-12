@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 
-@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf("home", "history")

@@ -1,5 +1,6 @@
 package com.example.blockchainproject.ui.compose.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,10 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.blockchainproject.R
 import com.example.blockchainproject.ui.viewmodel.HomeViewModel
 import com.example.blockchainproject.ui.viewmodel.LoginViewModel
 import com.example.blockchainproject.ui.viewmodel.factory.HomeViewModelFactory
@@ -47,6 +51,12 @@ fun HomeScreen(
             onLogout()
         }
     }
+//    Image(
+//        painter = painterResource(R.drawable.back),
+//        contentDescription = null,
+//        modifier = Modifier.fillMaxSize(),
+//        contentScale = ContentScale.Crop // or Fit, depending on your need
+//    )
 
     Box(
         modifier = Modifier

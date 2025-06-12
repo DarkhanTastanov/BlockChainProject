@@ -1,6 +1,7 @@
 package com.example.blockchainproject.ui.compose.screen
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,9 @@ import java.util.Date
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.example.blockchainproject.R
 
 @Composable
 fun HistoryScreen(
@@ -41,9 +45,17 @@ fun HistoryScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val filter by viewModel.filter.collectAsState()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(navController.currentBackStackEntry?.destination?.route) {
         viewModel.loadTransactions()
     }
+
+//    Image(
+//        painter = painterResource(R.drawable.back),
+//        contentDescription = null,
+//        modifier = Modifier.fillMaxSize(),
+//        contentScale = ContentScale.Crop // or Fit, depending on your need
+//    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()

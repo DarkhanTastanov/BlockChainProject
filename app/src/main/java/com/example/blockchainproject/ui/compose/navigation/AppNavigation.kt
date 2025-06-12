@@ -68,30 +68,30 @@ fun AppNavigation() {
 private fun getEnterTransition(initial: NavBackStackEntry, target: NavBackStackEntry): EnterTransition {
     return when {
         target.destination.route?.startsWith("transaction_details") == true -> {
-            scaleIn(initialScale = 0.8f, animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
+            scaleIn(initialScale = 0.8f, animationSpec = tween(500)) + fadeIn(animationSpec = tween(500))
         }
         initial.destination.route == "home" && target.destination.route == "history" -> {
-            slideInHorizontally(initialOffsetX = { it }) + fadeIn(animationSpec = tween(300))
+            slideInHorizontally(initialOffsetX = { it }) + fadeIn(animationSpec = tween(500))
         }
         initial.destination.route == "history" && target.destination.route == "home" -> {
-            slideInHorizontally(initialOffsetX = { -it }) + fadeIn(animationSpec = tween(300))
+            slideInHorizontally(initialOffsetX = { -it }) + fadeIn(animationSpec = tween(500))
         }
-        else -> fadeIn(animationSpec = tween(300))
+        else -> fadeIn(animationSpec = tween(500))
     }
 }
 
 private fun getExitTransition(initial: NavBackStackEntry, target: NavBackStackEntry): ExitTransition {
     return when {
         initial.destination.route?.startsWith("transaction_details") == true -> {
-            scaleOut(targetScale = 0.8f, animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+            scaleOut(targetScale = 0.8f, animationSpec = tween(500)) + fadeOut(animationSpec = tween(500))
         }
         initial.destination.route == "home" && target.destination.route == "history" -> {
-            slideOutHorizontally(targetOffsetX = { -it }) + fadeOut(animationSpec = tween(300))
+            slideOutHorizontally(targetOffsetX = { -it }) + fadeOut(animationSpec = tween(500))
         }
         initial.destination.route == "history" && target.destination.route == "home" -> {
-            slideOutHorizontally(targetOffsetX = { it }) + fadeOut(animationSpec = tween(300))
+            slideOutHorizontally(targetOffsetX = { it }) + fadeOut(animationSpec = tween(500))
         }
-        else -> fadeOut(animationSpec = tween(300))
+        else -> fadeOut(animationSpec = tween(500))
     }
 }
 
