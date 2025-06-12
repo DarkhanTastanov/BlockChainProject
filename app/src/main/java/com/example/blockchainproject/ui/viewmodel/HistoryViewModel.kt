@@ -34,17 +34,25 @@ class HistoryViewModel(
 
     private fun loadCachedTransactions() {
         _transactions.value = sharedPrefs.getSavedTransactions()
+        _isLoading.value = false
     }
 
     private fun refreshInBackground() {
         val address = sharedPrefs.getSavedAddress() ?: return
+
+        val cached = sharedPrefs.getSavedTransactions()
+        val hasCache = cached.isNotEmpty()
+        _transactions.value = cached
+
         viewModelScope.launch {
-            _isLoading.value = true
+            if (!hasCache) _isLoading.value = true
+
             val freshData = repository.getTransactions(address)
             if (freshData != _transactions.value) {
                 sharedPrefs.saveTransactions(freshData)
                 _transactions.value = freshData
             }
+
             _isLoading.value = false
         }
     }

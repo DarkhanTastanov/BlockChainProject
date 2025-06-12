@@ -16,27 +16,35 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.blockchainproject.data.local.SharedPrefsHelper
 import com.example.blockchainproject.repository.AccountRepository
 import com.example.blockchainproject.ui.viewmodel.TransactionDetailsViewModel
 import com.example.blockchainproject.ui.viewmodel.factory.TransactionDetailsViewModelFactory
 
 @Composable
 fun TransactionDetailsScreen(hash: String, address: String) {
+    val context = LocalContext.current
     val repository = remember { AccountRepository() }
+    val sharedPrefs = remember { SharedPrefsHelper(context) }
 
     val viewModel: TransactionDetailsViewModel = viewModel(
-        factory = TransactionDetailsViewModelFactory(repository)
+        factory = TransactionDetailsViewModelFactory(repository, sharedPrefs)
     )
+
+    val isLoading by viewModel.isLoading.collectAsState()
+
     val transaction by viewModel.transaction.collectAsState()
 
     LaunchedEffect(hash, address) {
         viewModel.loadTransactionByHash(address, hash)
     }
 
-    val context = LocalContext.current
     val url = "https://nile.tronscan.org/#/transaction/$hash"
     val baseGlassColor = Color(0xFFB2EBF2)
-    val borderColors = listOf(Color(0xFFFF4444), Color(0xFFFF8888), Color(0xFFFF4444))
+    val borderColors = listOf(
+        Color(0xFFFF4444),
+        Color(0xFFFF8888),
+        Color(0xFFFF4444))
 
     Column(
         modifier = Modifier
@@ -59,14 +67,17 @@ fun TransactionDetailsScreen(hash: String, address: String) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (transaction == null) {
+        if (isLoading) {
             CircularProgressIndicator()
         } else {
-            DetailRow("Hash", transaction!!.hash)
-            DetailRow("Amount", "${transaction!!.amount} TRX")
-            DetailRow("Type", transaction!!.type)
-            DetailRow("Timestamp", formatTimestamp(transaction!!.timestamp))
+            transaction?.let {
+                DetailRow("Hash", it.hash)
+                DetailRow("Amount", "${it.amount} TRX")
+                DetailRow("Type", it.type)
+                DetailRow("Timestamp", formatTimestamp(it.timestamp))
+            } ?: Text("Transaction not found.", color = Color.Red)
         }
+
 
         Spacer(modifier = Modifier.height(24.dp))
 
