@@ -1,8 +1,11 @@
 package com.example.blockchainproject.repository
 
+import android.content.Context
+import com.example.blockchainproject.data.db.AppDatabase
 import com.example.blockchainproject.data.entity.AccountInfo
 import com.example.blockchainproject.data.entity.AccountRequest
 import com.example.blockchainproject.data.entity.Transaction
+import com.example.blockchainproject.data.entity.TransactionEntity
 import com.google.gson.Gson
 import kotlinx.coroutines.CancellationException
 import okhttp3.MediaType.Companion.toMediaType
@@ -13,7 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-class AccountRepository {
+class AccountRepository(context: Context) {
 
     private val client = OkHttpClient()
     private val gson = Gson()
@@ -76,16 +79,20 @@ class AccountRepository {
         }
     }
 
-    suspend fun getTransactions(address: String): List<Transaction> = withContext(Dispatchers.IO) {
+    private val db = AppDatabase.getInstance(context)
+    private val transactionDao = db.transactionDao()
+    suspend fun getTransactions(address: String): List<TransactionEntity> = withContext(Dispatchers.IO) {
         val url = "https://nile.trongrid.io/v1/accounts/$address/transactions?only_confirmed=true"
         val request = Request.Builder().url(url).build()
 
         try {
             client.newCall(request).execute().use { resp ->
-                if (!resp.isSuccessful) return@withContext emptyList()
+                if (!resp.isSuccessful) return@withContext transactionDao.getAll()
+
                 val json = JSONObject(resp.body?.string().orEmpty())
-                val arr = json.optJSONArray("data") ?: return@withContext emptyList()
-                (0 until arr.length()).mapNotNull { i ->
+                val arr = json.optJSONArray("data") ?: return@withContext transactionDao.getAll()
+
+                val result = (0 until arr.length()).mapNotNull { i ->
                     val tx = arr.getJSONObject(i)
                     val hash = tx.optString("txID", "")
                     val timestamp = tx.optLong("block_timestamp", 0L)
@@ -97,7 +104,7 @@ class AccountRepository {
                     val toAddress = param.optString("to_address", "")
                     val fromAddress = param.optString("from_address", "")
                     val isIncoming = toAddress == address
-                    Transaction(
+                    TransactionEntity(
                         hash = hash,
                         amount = value,
                         type = if (isIncoming) "outgoing" else "incoming",
@@ -106,11 +113,21 @@ class AccountRepository {
                         fromAddress = fromAddress
                     )
                 }
+
+                transactionDao.clear()
+                transactionDao.insertAll(result)
+                return@withContext result
             }
-        } catch (e:CancellationException) {
+        } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            throw e
+            return@withContext transactionDao.getAll()
+        }
+    }
+
+    suspend fun getLocalTransactions(): List<TransactionEntity> {
+        return withContext(Dispatchers.IO) {
+            transactionDao.getAll()
         }
     }
 }

@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val repository: AccountRepository = AccountRepository(),
+    private val repository: AccountRepository,
     private val sharedPrefs: SharedPrefsHelper
 ) : ViewModel() {
 

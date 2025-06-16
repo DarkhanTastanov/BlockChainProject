@@ -24,7 +24,7 @@ import com.example.blockchainproject.ui.viewmodel.factory.TransactionDetailsView
 @Composable
 fun TransactionDetailsScreen(hash: String, address: String) {
     val context = LocalContext.current
-    val repository = remember { AccountRepository() }
+    val repository = remember { AccountRepository(context) }
     val sharedPrefs = remember { SharedPrefsHelper(context) }
 
     val viewModel: TransactionDetailsViewModel = viewModel(

@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
-
+    id("kotlin-kapt")
 }
 
 
@@ -71,4 +71,8 @@ dependencies {
 //okhttp
     implementation(libs.okhttp)
     implementation(libs.gson)
+
+//    room
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
 }

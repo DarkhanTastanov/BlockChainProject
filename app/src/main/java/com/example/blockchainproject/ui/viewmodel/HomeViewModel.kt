@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val repository: AccountRepository = AccountRepository(),
+    private val repository: AccountRepository,
     private val sharedPrefs: SharedPrefsHelper
 ) : ViewModel() {
 
