@@ -75,8 +75,10 @@ fun HistoryScreen(
                     GlassRedButton(
                         text = type.replaceFirstChar { it.uppercase() },
                         onClick = { viewModel.setFilter(type) },
+                        selected = filter == type,
                         modifier = Modifier.weight(1f)
                     )
+
                 }
             }
 
@@ -89,7 +91,7 @@ fun HistoryScreen(
                     )
             } else {
                 LazyColumn {
-                    items(transactions) { tx ->
+                    items(transactions, key = { it.hash }) { tx ->
                         AnimatedVisibility(visible = true) {
                             GlassCard(
                                 modifier = Modifier

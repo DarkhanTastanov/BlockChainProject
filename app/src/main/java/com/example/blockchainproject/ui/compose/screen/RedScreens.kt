@@ -16,7 +16,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -24,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.TextStyle
@@ -41,15 +39,22 @@ val SamsungColorScheme = darkColorScheme(
     error = Color(0xFFF87171),
     onError = Color.Black
 )
+
 @Composable
 fun GlassRedButton(
     text: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
     loading: Boolean = false,
+    selected: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(12.dp)
+    val borderColor = SamsungColorScheme.primary
+    val backgroundColor = if (selected) SamsungColorScheme.primary.copy(alpha = 0.2f)
+    else SamsungColorScheme.onSurface.copy(alpha = 0.15f)
+    val textColor = if (selected) SamsungColorScheme.primaryContainer
+    else SamsungColorScheme.primary
 
     Box(
         modifier = modifier
@@ -60,7 +65,7 @@ fun GlassRedButton(
             .background(Color.Transparent)
             .border(
                 width = 2.dp,
-                color = SamsungColorScheme.primary,
+                color = borderColor,
                 shape = shape
             )
     ) {
@@ -69,14 +74,14 @@ fun GlassRedButton(
                 .matchParentSize()
                 .clip(shape)
                 .blur(10.dp)
-                .background(SamsungColorScheme.onSurface.copy(alpha = 0.15f))
+                .background(backgroundColor)
                 .clickable(
                     enabled = enabled,
                     onClick = onClick,
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 )
-            )
+        )
 
         Box(
             modifier = Modifier
@@ -93,13 +98,14 @@ fun GlassRedButton(
             } else {
                 Text(
                     text = text,
-                    color = SamsungColorScheme.primary,
+                    color = textColor,
                     style = MaterialTheme.typography.labelLarge
                 )
             }
         }
     }
 }
+
 
 @Composable
 fun GlassOutlinedTextField(

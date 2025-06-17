@@ -1,14 +1,16 @@
 package com.example.blockchainproject.ui.compose.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,12 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
@@ -41,56 +40,32 @@ fun BottomNavigationBar(navController: NavHostController) {
 
     Box(
         modifier = Modifier
-            .padding(horizontal = 8.dp)
-            .padding(bottom = 24.dp)
+            .padding(horizontal = 8.dp, vertical = 16.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(baseGlassColor)
+            .border(2.dp, SamsungColorScheme.primary, RoundedCornerShape(12.dp))
+            .height(60.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .height(54.dp)
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            NavigationBar(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.Transparent)
-                    .border(
-                        width = 2.dp,
-                        color = SamsungColorScheme.primary,
-                        shape = RoundedCornerShape(12.dp)
-                    ),
-                containerColor = Color.Transparent,
-                tonalElevation = 0.dp
-            ) {
-                items.forEachIndexed { index, screen ->
-                    val selected = currentRoute == screen
-                    val animatedScale by animateFloatAsState(
-                        targetValue = if (selected) 2f else 1f,
-                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
-                        label = ""
-                    )
+            items.forEachIndexed { index, screen ->
+                val selected = currentRoute == screen
+                val animatedScale by animateFloatAsState(
+                    targetValue = if (selected) 2f else 1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                    label = ""
+                )
 
-                    NavigationBarItem(
-                        icon = {
-                            Box(
-                                modifier = Modifier
-                                    .height(54.dp),
-                                contentAlignment = androidx.compose.ui.Alignment.Center
-                            ) {
-                                Icon(
-                                    icons[index],
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .graphicsLayer {
-                                            scaleX = animatedScale
-                                            scaleY = animatedScale
-                                        }
-                                )
-                            }
-                        },
-                        label = null,
-                        selected = selected,
-                        onClick = {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (selected) Color.White.copy(0.1f) else Color.Transparent)
+                        .clickable {
                             if (currentRoute != screen) {
                                 navController.navigate(screen) {
                                     popUpTo(navController.graph.startDestinationId) { saveState = true }
@@ -99,18 +74,19 @@ fun BottomNavigationBar(navController: NavHostController) {
                                 }
                             }
                         },
-                        alwaysShowLabel = false,
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = SamsungColorScheme.primary,
-                            indicatorColor = Color.White.copy(alpha = 0.3f),
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray
-                        ),
-                        interactionSource = MutableInteractionSource(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icons[index],
+                        contentDescription = null,
+                        tint = if (selected) SamsungColorScheme.primary else Color.Gray,
+                        modifier = Modifier.graphicsLayer {
+                            scaleX = animatedScale
+                            scaleY = animatedScale
+                        }
                     )
                 }
             }
         }
     }
-
 }
