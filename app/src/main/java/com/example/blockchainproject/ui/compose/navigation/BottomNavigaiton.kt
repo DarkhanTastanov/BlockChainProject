@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import com.example.blockchainproject.ui.compose.screen.SamsungColorScheme
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
@@ -36,7 +37,7 @@ fun BottomNavigationBar(navController: NavHostController) {
     val icons = listOf(Icons.Default.Home, Icons.Default.List)
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    val baseGlassColor = Color(0xFFB2EBF2)
+    val baseGlassColor = SamsungColorScheme.background
 
     Box(
         modifier = Modifier
@@ -55,13 +56,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                     .background(Color.Transparent)
                     .border(
                         width = 2.dp,
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                Color(0xFFFF4444),
-                                Color(0xFFFF8888),
-                                Color(0xFFFF4444)
-                            )
-                        ),
+                        color = SamsungColorScheme.primary,
                         shape = RoundedCornerShape(12.dp)
                     ),
                 containerColor = Color.Transparent,
@@ -106,8 +101,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                         },
                         alwaysShowLabel = false,
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color(0xFFFF4444),
-                            selectedTextColor = Color(0xFFFF4444),
+                            selectedIconColor = SamsungColorScheme.primary,
                             indicatorColor = Color.White.copy(alpha = 0.3f),
                             unselectedIconColor = Color.Gray,
                             unselectedTextColor = Color.Gray

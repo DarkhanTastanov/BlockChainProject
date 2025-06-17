@@ -66,12 +66,7 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFE0F7FA),
-                        Color(0xFFB2EBF2)
-                    )
-                )
+                color = SamsungColorScheme.background
             )
             .padding(24.dp)
     ) {

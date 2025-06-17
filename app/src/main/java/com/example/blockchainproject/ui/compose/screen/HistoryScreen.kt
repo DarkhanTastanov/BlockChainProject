@@ -30,6 +30,8 @@ import com.example.blockchainproject.ui.viewmodel.HistoryViewModel
 import com.example.blockchainproject.ui.viewmodel.factory.HistoryViewModelFactory
 import java.util.Date
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -60,14 +62,9 @@ fun HistoryScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFE0F7FA),
-                        Color(0xFFB2EBF2)
-                    )
-                )
+                color = SamsungColorScheme.background
             )
-            .padding(24.dp)
+            .padding(16.dp)
     ){
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Row(
@@ -88,7 +85,7 @@ fun HistoryScreen(
                 CircularProgressIndicator(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally),
-                    color =Color(0xFFFF4444)
+                    color = SamsungColorScheme.primaryContainer
                     )
             } else {
                 LazyColumn {
@@ -104,12 +101,19 @@ fun HistoryScreen(
                                     }
 
                             ) {
-                                Column {
-                                    Text("Hash: ${tx.hash.take(12)}...", color = Color.Black)
-                                    Text("Amount: ${tx.amount / 1_000_000.0} TRX", color = Color.Black)
-                                    Text("Type: ${tx.type}", color = Color.Black)
-                                    Text("Date: ${Date(tx.timestamp)}", color = Color.Black)
+                                CompositionLocalProvider(
+                                LocalContentColor provides SamsungColorScheme.primary
+                            ){
+                                Column(
+                                    modifier = Modifier.padding(8.dp)
+                                ) {
+                                    Text("Hash: ${tx.hash.take(12)}...")
+                                    Text("Amount: ${tx.amount / 1_000_000.0} TRX")
+                                    Text("Type: ${tx.type}")
+                                    Text("Date: ${Date(tx.timestamp)}")
                                 }
+                            }
+
                             }
                         }
                     }

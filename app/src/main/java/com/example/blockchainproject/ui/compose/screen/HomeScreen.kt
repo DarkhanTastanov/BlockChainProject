@@ -13,9 +13,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,12 +64,7 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFE0F7FA),
-                        Color(0xFFB2EBF2)
-                    )
-                )
+                color = SamsungColorScheme.background
             )
             .padding(24.dp)
     ) {
@@ -80,7 +77,7 @@ fun HomeScreen(
 
         if (accountInfo == null && isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center),
-                color =Color(0xFFFF4444))
+                color = SamsungColorScheme.primaryContainer)
         } else {
             accountInfo?.let { info ->
                 Card(
@@ -92,35 +89,39 @@ fun HomeScreen(
                         containerColor = Color.White.copy(alpha = 0.15f)
                     )
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    CompositionLocalProvider(
+                        LocalContentColor provides SamsungColorScheme.primary
                     ) {
-                        Text(
-                            "Баланс: ${info.balance / 1_000_000.0} TRX",
-                            fontSize = 20.sp
-                        )
-                        Text(
-                            "Имя аккаунта: ${info.name ?: "Не указано"}",
-                            fontSize = 20.sp
-                        )
-                        Text(
-                            "Количество транзакций: ${info.totalTransactions}",
-                            fontSize = 20.sp
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                "Баланс: ${info.balance / 1_000_000.0} TRX",
+                                fontSize = 20.sp
+                            )
+                            Text(
+                                "Имя аккаунта: ${info.name ?: "Не указано"}",
+                                fontSize = 20.sp
+                            )
+                            Text(
+                                "Количество транзакций: ${info.totalTransactions}",
+                                fontSize = 20.sp,
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        GlassRedButton(
-                            text = "Обновить",
-                            onClick = { homeViewModel.reloadManually() },
-                            loading = isLoading,
-                            modifier = Modifier.fillMaxWidth()
-
-                        )
+                            GlassRedButton(
+                                text = "Обновить",
+                                onClick = { homeViewModel.reloadManually() },
+                                loading = isLoading,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
+
             } ?: Text("Нет сохранённых данных", modifier = Modifier.align(Alignment.Center))
         }
     }

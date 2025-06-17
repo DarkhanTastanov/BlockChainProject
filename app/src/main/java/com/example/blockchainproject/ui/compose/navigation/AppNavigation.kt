@@ -17,7 +17,7 @@ import com.example.blockchainproject.ui.compose.screen.*
 fun AppNavigation() {
     val navController = rememberNavController()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    val pageBackgroundColor = Color(0xFFB2EBF2)
+    val pageBackgroundColor = SamsungColorScheme.background
 
     Scaffold(
         bottomBar = {

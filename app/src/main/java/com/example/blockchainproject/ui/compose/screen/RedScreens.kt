@@ -10,11 +10,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,9 +27,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 
-
+val SamsungColorScheme = darkColorScheme(
+    primary = Color(0xFF38BDF8),
+    onPrimary = Color.Black,
+    primaryContainer = Color(0xFF0EA5E9),
+    background = Color(0xFF000000),
+    surface = Color(0xFF1F2937),
+    onBackground = Color(0xFFF3F4F6),
+    onSurface = Color(0xFFE5E7EB),
+    error = Color(0xFFF87171),
+    onError = Color.Black
+)
 @Composable
 fun GlassRedButton(
     text: String,
@@ -45,13 +60,7 @@ fun GlassRedButton(
             .background(Color.Transparent)
             .border(
                 width = 2.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFFF4444),
-                        Color(0xFFFF8888),
-                        Color(0xFFFF4444)
-                    )
-                ),
+                color = SamsungColorScheme.primary,
                 shape = shape
             )
     ) {
@@ -60,7 +69,7 @@ fun GlassRedButton(
                 .matchParentSize()
                 .clip(shape)
                 .blur(10.dp)
-                .background(Color.Red.copy(alpha = 0.15f))
+                .background(SamsungColorScheme.onSurface.copy(alpha = 0.15f))
                 .clickable(
                     enabled = enabled,
                     onClick = onClick,
@@ -78,13 +87,13 @@ fun GlassRedButton(
             if (loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
-                    color = Color(0xFFFF4444),
+                    color = SamsungColorScheme.primaryContainer,
                     strokeWidth = 2.dp
                 )
             } else {
                 Text(
                     text = text,
-                    color = Color(0xFFFF4444),
+                    color = SamsungColorScheme.primary,
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -105,16 +114,16 @@ fun GlassOutlinedTextField(
     val shape = RoundedCornerShape(12.dp)
 
     val focusedBorderColor = when {
-        isError -> Color(0xFFFF4444)
+        isError -> SamsungColorScheme.error
         isValid -> Color(0xFF4CAF50)
-        value.isEmpty() -> Color.White
+        value.isEmpty() -> SamsungColorScheme.primary
         else -> MaterialTheme.colorScheme.primary
     }
 
     val unfocusedBorderColor = when {
-        isError -> Color(0xFFFF8888)
+        isError -> SamsungColorScheme.error
         isValid -> Color(0xFF81C784)
-        value.isEmpty() -> Color.White
+        value.isEmpty() -> SamsungColorScheme.primary
         else -> MaterialTheme.colorScheme.outline
     }
     Box(
@@ -134,6 +143,7 @@ fun GlassOutlinedTextField(
                 Text(supportingText)
             }
         },
+        textStyle = TextStyle(color = SamsungColorScheme.primary),
         modifier = Modifier
             .fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
@@ -141,10 +151,10 @@ fun GlassOutlinedTextField(
             unfocusedBorderColor = unfocusedBorderColor,
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
-            errorBorderColor = Color(0xFFFF4444),
+            errorBorderColor = SamsungColorScheme.error,
             errorContainerColor = Color.Transparent,
-            focusedLabelColor = Color.Black,
-            unfocusedLabelColor = Color.Black,
+            focusedLabelColor = SamsungColorScheme.primary,
+            unfocusedLabelColor = SamsungColorScheme.primary,
         ),
         shape = shape
     )
@@ -162,12 +172,7 @@ fun GlassCard(
             .background(Color.Transparent)
             .border(
                 width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFFF4444),
-                        Color(0xFFFF8888)
-                    )
-                ),
+                color = SamsungColorScheme.primary,
                 shape = shape
             )
     ) {
@@ -176,9 +181,12 @@ fun GlassCard(
                 .matchParentSize()
                 .clip(shape)
                 .blur(12.dp)
-                .background(Color.Red.copy(alpha = 0.07f))
+                .background(SamsungColorScheme.onBackground.copy(alpha = 0.07f))
         )
-        Box(modifier = Modifier.padding(16.dp)) {
+        Box(modifier = Modifier.padding(16.dp))
+        CompositionLocalProvider(
+            LocalContentColor provides SamsungColorScheme.primary
+        ){
             content()
         }
     }
