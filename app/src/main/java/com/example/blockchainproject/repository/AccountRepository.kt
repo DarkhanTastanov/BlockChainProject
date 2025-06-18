@@ -4,7 +4,6 @@ import android.content.Context
 import com.example.blockchainproject.data.db.AppDatabase
 import com.example.blockchainproject.data.entity.AccountInfo
 import com.example.blockchainproject.data.entity.AccountRequest
-import com.example.blockchainproject.data.entity.Transaction
 import com.example.blockchainproject.data.entity.TransactionEntity
 import com.google.gson.Gson
 import kotlinx.coroutines.CancellationException
@@ -28,7 +27,7 @@ class AccountRepository(context: Context) {
             val requestBody = gson.toJson(accountRequest).toRequestBody(jsonMediaType)
 
             val request = Request.Builder()
-                .url("https://api.shasta.trongrid.io/wallet/getaccount")
+                .url("https://api.trongrid.io/wallet/getaccount")
                 .post(requestBody)
                 .addHeader("accept", "application/json")
                 .addHeader("content-type", "application/json")
@@ -47,13 +46,19 @@ class AccountRepository(context: Context) {
         }
     }
 
-    suspend fun fetchAccountInfo(address: String): AccountInfo? {
+    suspend fun fetchAccountInfo(address: String, mainNet: Boolean): AccountInfo? {
         return withContext(Dispatchers.IO) {
             val accountRequest = AccountRequest(address)
             val requestBody = gson.toJson(accountRequest).toRequestBody(jsonMediaType)
 
+            val url = if (mainNet) {
+                "https://api.trongrid.io/wallet/getaccount"
+            } else {
+                "https://nile.trongrid.io/wallet/getaccount"
+            }
+
             val request = Request.Builder()
-                .url("https://nile.trongrid.io/wallet/getaccount")
+                .url(url)
                 .post(requestBody)
                 .addHeader("accept", "application/json")
                 .addHeader("content-type", "application/json")
@@ -81,22 +86,26 @@ class AccountRepository(context: Context) {
 
     private val db = AppDatabase.getInstance(context)
     private val transactionDao = db.transactionDao()
-    suspend fun getTransactions(address: String): List<TransactionEntity> = withContext(Dispatchers.IO) {
-        val url = "https://nile.trongrid.io/v1/accounts/$address/transactions?only_confirmed=true"
+    suspend fun getTransactions(address: String, mainNet: Boolean): List<TransactionEntity> = withContext(Dispatchers.IO) {
+        val url = if (mainNet) {
+            "https://api.trongrid.io//v1/accounts/$address/transactions?only_confirmed=true"
+        } else {
+            "https://nile.trongrid.io/v1/accounts/$address/transactions?only_confirmed=true"
+        }
         val request = Request.Builder().url(url).build()
+        val networkType = if (mainNet) "mainnet" else "testnet" // Define networkType once
 
         try {
             client.newCall(request).execute().use { resp ->
-                if (!resp.isSuccessful) return@withContext transactionDao.getAll()
+                if (!resp.isSuccessful) return@withContext transactionDao.getTransactionsByNetwork(networkType = networkType)
 
                 val json = JSONObject(resp.body?.string().orEmpty())
-                val arr = json.optJSONArray("data") ?: return@withContext transactionDao.getAll()
+                val arr = json.optJSONArray("data") ?: return@withContext transactionDao.getTransactionsByNetwork(networkType)
 
                 val result = (0 until arr.length()).mapNotNull { i ->
                     val tx = arr.getJSONObject(i)
                     val hash = tx.optString("txID", "")
                     val timestamp = tx.optLong("block_timestamp", 0L)
-                    val type = tx.optString("type", "")
                     val raw = tx.optJSONObject("raw_data") ?: return@mapNotNull null
                     val contract = raw.optJSONArray("contract")?.optJSONObject(0)
                     val param = contract?.optJSONObject("parameter")?.optJSONObject("value") ?: return@mapNotNull null
@@ -110,17 +119,19 @@ class AccountRepository(context: Context) {
                         type = if (isIncoming) "outgoing" else "incoming",
                         timestamp = timestamp,
                         toAddress = toAddress,
-                        fromAddress = fromAddress
+                        fromAddress = fromAddress,
+                        networkType = if (mainNet) "mainnet" else "testnet"
                     )
                 }
-
-                transactionDao.clear()
+                transactionDao.clearByNetwork(networkType)
                 transactionDao.insertAll(result)
                 return@withContext result
             }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            e.printStackTrace()
+
             return@withContext transactionDao.getAll()
         }
     }
@@ -130,4 +141,14 @@ class AccountRepository(context: Context) {
             transactionDao.getAll()
         }
     }
+
+    suspend fun clearTransactions() {
+        return withContext(Dispatchers.IO) {
+        transactionDao.clear()
+    }}
+
+    suspend fun getLocalTransactionsByNetwork(networkType: String): List<TransactionEntity> {
+        return transactionDao.getTransactionsByNetwork(networkType)
+    }
+
 }

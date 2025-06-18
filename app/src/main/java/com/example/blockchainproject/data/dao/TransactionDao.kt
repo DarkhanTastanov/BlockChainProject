@@ -16,4 +16,11 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions")
     suspend fun clear()
+
+    @Query("SELECT * FROM transactions WHERE networkType = :networkType")
+    suspend fun getTransactionsByNetwork(networkType: String): List<TransactionEntity>
+
+    @Query("DELETE FROM transactions WHERE networkType = :networkType")
+    suspend fun clearByNetwork(networkType: String)
+
 }

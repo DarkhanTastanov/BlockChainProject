@@ -64,9 +64,12 @@ class LoginViewModel(
     }
 
     fun logout() {
-        sharedPrefs.clearAll()
-        _isLoginSuccessful.value = null
-        _shouldLogout.value = true
+        viewModelScope.launch {
+            sharedPrefs.clearAll()
+            _isLoginSuccessful.value = null
+            _shouldLogout.value = true
+            repository.clearTransactions()
+        }
     }
 
 }

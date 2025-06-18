@@ -10,5 +10,6 @@ data class TransactionEntity(
     val type: String,
     val timestamp: Long,
     val toAddress: String,
-    val fromAddress: String
+    val fromAddress: String,
+    val networkType: String
 )

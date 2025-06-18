@@ -2,17 +2,17 @@ package com.example.blockchainproject.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.blockchainproject.data.entity.Transaction
 import com.example.blockchainproject.data.entity.TransactionEntity
 import com.example.blockchainproject.data.local.SharedPrefsHelper
 import com.example.blockchainproject.repository.AccountRepository
+import com.example.blockchainproject.repository.source.NetworkModeManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
 
 class HistoryViewModel(
     private val repository: AccountRepository,
@@ -22,38 +22,50 @@ class HistoryViewModel(
     private val _transactions = MutableStateFlow<List<TransactionEntity>>(emptyList())
     val transactions: StateFlow<List<TransactionEntity>> = _transactions
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _filter = MutableStateFlow("all")
     val filter: StateFlow<String> = _filter
 
+    val isMainNet: StateFlow<Boolean> = NetworkModeManager.isMainNet
+
     init {
-        loadLocalTransactions()
-        refreshTransactions()
+        observeNetworkChanges()
     }
 
-    private fun loadLocalTransactions() {
+    private fun observeNetworkChanges() {
         viewModelScope.launch {
-            _isLoading.value = true
-            _transactions.value = repository.getLocalTransactions()
-            _isLoading.value = false
-        }
-    }
+            NetworkModeManager.isMainNet.collectLatest { isMain ->
+                _isLoading.value = true
+                val netType = if (isMain) "mainnet" else "testnet"
 
-    private fun refreshTransactions() {
-        val address = sharedPrefs.getSavedAddress() ?: return
+                val address = sharedPrefs.getSavedAddress()
+                if (address != null) {
+                    val remote = repository.getTransactions(address, isMain)
+                    // **Crucially, create a new list instance:**
+                    _transactions.value = remote.toList() // Convert to a new list
+                } else {
+                    val local = repository.getLocalTransactionsByNetwork(netType)
+                    // **Crucially, create a new list instance:**
+                    _transactions.value = local.toList() // Convert to a new list
+                }
 
-        viewModelScope.launch {
-            _isLoading.value = true
-            val fresh = repository.getTransactions(address)
-            _transactions.value = fresh
-            _isLoading.value = false
+                _isLoading.value = false
+            }
         }
     }
 
     fun loadTransactions() {
-        refreshTransactions()
+        viewModelScope.launch {
+            _isLoading.value = true
+            val currentNet = isMainNet.value
+            val address = sharedPrefs.getSavedAddress() ?: return@launch
+            val fresh = repository.getTransactions(address, currentNet)
+            // **Crucially, create a new list instance:**
+            _transactions.value = fresh.toList() // Convert to a new list
+            _isLoading.value = false
+        }
     }
 
     fun setFilter(type: String) {

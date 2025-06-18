@@ -3,9 +3,7 @@ package com.example.blockchainproject.data.local
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.blockchainproject.data.entity.AccountInfo
-import com.example.blockchainproject.data.entity.Transaction
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 class SharedPrefsHelper(context: Context) {
 
@@ -14,7 +12,6 @@ class SharedPrefsHelper(context: Context) {
 
     companion object {
         private const val KEY_SAVED_ADDRESS = "saved_tron_address"
-        private const val KEY_ACCOUNT_INFO = "account_info"
     }
 
     fun saveAddress(address: String) {
@@ -29,38 +26,30 @@ class SharedPrefsHelper(context: Context) {
         prefs.edit().remove(KEY_SAVED_ADDRESS).apply()
     }
 
+    private val KEY_ACCOUNT_INFO_MAINNET = "key_account_info_mainnet"
+    private val KEY_ACCOUNT_INFO_TESTNET = "key_account_info_testnet"
 
-    fun saveAccountInfo(info: AccountInfo) {
+    fun saveAccountInfo(info: AccountInfo, isMainNet: Boolean) {
+        val key = if (isMainNet) KEY_ACCOUNT_INFO_MAINNET else KEY_ACCOUNT_INFO_TESTNET
         val json = gson.toJson(info)
-        prefs.edit().putString(KEY_ACCOUNT_INFO, json).apply()
+        prefs.edit().putString(key, json).apply()
     }
 
-    fun getSavedAccountInfo(): AccountInfo? {
-        val json = prefs.getString(KEY_ACCOUNT_INFO, null) ?: return null
-        return try {
-            gson.fromJson(json, AccountInfo::class.java)
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    fun saveTransactions(transactions: List<Transaction>) {
-        val json = gson.toJson(transactions)
-        prefs.edit().putString("cached_transactions", json).apply()
-    }
-
-    fun getSavedTransactions(): List<Transaction> {
-        val json = prefs.getString("cached_transactions", null) ?: return emptyList()
-        return try {
-            val type = object : TypeToken<List<Transaction>>() {}.type
-            gson.fromJson(json, type)
-        } catch (e: Exception) {
-            emptyList()
-        }
+    fun getSavedAccountInfo(isMainNet: Boolean): AccountInfo? {
+        val key = if (isMainNet) KEY_ACCOUNT_INFO_MAINNET else KEY_ACCOUNT_INFO_TESTNET
+        val json = prefs.getString(key, null) ?: return null
+        return gson.fromJson(json, AccountInfo::class.java)
     }
 
     fun clearAll() {
         prefs.edit().clear().apply()
+    }
+    fun setIsMainNet(isMainNet: Boolean) {
+        prefs.edit().putBoolean("is_main_net", isMainNet).apply()
+    }
+
+    fun getIsMainNet(): Boolean {
+        return prefs.getBoolean("is_main_net", true)
     }
 
 }

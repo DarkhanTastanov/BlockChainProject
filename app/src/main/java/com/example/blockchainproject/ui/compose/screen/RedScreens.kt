@@ -197,3 +197,23 @@ fun GlassCard(
         }
     }
 }
+
+@Composable
+fun NetworkToggle(isMainNet: Boolean, onToggle: () -> Unit) {
+    val backgroundColor = if (isMainNet) SamsungColorScheme.primary else SamsungColorScheme.onPrimary
+    val textColor = if (isMainNet) SamsungColorScheme.onPrimary else SamsungColorScheme.primary
+
+    Box(
+        modifier = Modifier
+            .padding(8.dp)
+            .clip(RoundedCornerShape(50))
+            .background(backgroundColor)
+            .clickable { onToggle() }
+            .padding(horizontal = 20.dp, vertical = 10.dp)
+    ) {
+        Text(
+            text = if (isMainNet) "MainNet" else "TestNet",
+            color = textColor
+        )
+    }
+}

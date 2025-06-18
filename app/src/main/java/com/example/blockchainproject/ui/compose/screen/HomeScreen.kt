@@ -1,6 +1,5 @@
 package com.example.blockchainproject.ui.compose.screen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +13,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -23,15 +21,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.blockchainproject.R
 import com.example.blockchainproject.ui.viewmodel.HomeViewModel
 import com.example.blockchainproject.ui.viewmodel.LoginViewModel
 import com.example.blockchainproject.ui.viewmodel.factory.HomeViewModelFactory
@@ -46,19 +40,13 @@ fun HomeScreen(
     val accountInfo by homeViewModel.accountInfo.collectAsState()
     val isLoading by homeViewModel.isLoading.collectAsState()
     val shouldLogout by loginViewModel.shouldLogout.collectAsState()
-
+    val isMainNet by homeViewModel.isMainNet.collectAsState()
     LaunchedEffect(shouldLogout) {
         if (shouldLogout) {
             loginViewModel.acknowledgeLogoutHandled()
             onLogout()
         }
     }
-//    Image(
-//        painter = painterResource(R.drawable.back),
-//        contentDescription = null,
-//        modifier = Modifier.fillMaxSize(),
-//        contentScale = ContentScale.Crop // or Fit, depending on your need
-//    )
 
     Box(
         modifier = Modifier
@@ -68,6 +56,11 @@ fun HomeScreen(
             )
             .padding(24.dp)
     ) {
+        NetworkToggle(
+            isMainNet = isMainNet,
+            onToggle = { homeViewModel.toggleNetworkMode() }
+        )
+
         GlassRedButton(
             text = "Выйти",
             onClick = { loginViewModel.logout() },

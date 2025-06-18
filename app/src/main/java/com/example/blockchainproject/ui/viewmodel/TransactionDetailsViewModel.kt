@@ -23,6 +23,8 @@ class TransactionDetailsViewModel(
     private val _transactionUrl = MutableStateFlow<String?>(null)
     val transactionUrl: StateFlow<String?> = _transactionUrl
 
+    private val _isMainNet = MutableStateFlow(sharedPrefs.getIsMainNet())
+
     fun loadTransactionByHash(address: String, hash: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -36,7 +38,7 @@ class TransactionDetailsViewModel(
                 return@launch
             }
 
-            val freshTransactions = repository.getTransactions(address)
+            val freshTransactions = repository.getTransactions(address, _isMainNet.value)
             val match = freshTransactions.find { it.hash == hash }
             if (match != null) {
                 _transaction.value = match
