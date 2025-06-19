@@ -1,5 +1,6 @@
 [versions]
 agp = "8.6.1"
+bitcoinjCore = "0.16.3"
 gradle = "8.1.4"
 gson = "2.10.1"
 kotlin = "2.1.0"
@@ -31,6 +32,7 @@ androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtim
 androidx-lifecycle-viewmodel-compose-v280 = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelComposeVersion" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+bitcoinj-core = { module = "org.bitcoinj:bitcoinj-core", version.ref = "bitcoinjCore" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

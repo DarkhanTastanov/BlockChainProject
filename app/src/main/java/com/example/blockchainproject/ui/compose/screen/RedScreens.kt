@@ -29,9 +29,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 
 val SamsungColorScheme = darkColorScheme(
-    primary = Color(0xFF38BDF8),
+    primary = Color(0xFFc4c5ca),
     onPrimary = Color.Black,
-    primaryContainer = Color(0xFF0EA5E9),
+    primaryContainer = Color(0xFF2c2d32),
     background = Color(0xFF000000),
     surface = Color(0xFF1F2937),
     onBackground = Color(0xFFF3F4F6),

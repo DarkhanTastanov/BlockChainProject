@@ -6,6 +6,7 @@ import com.example.blockchainproject.data.entity.AccountInfo
 import com.example.blockchainproject.data.entity.AccountRequest
 import com.example.blockchainproject.data.entity.TransactionEntity
 import com.google.gson.Gson
+import org.bitcoinj.core.Base58
 import kotlinx.coroutines.CancellationException
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -13,6 +14,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 
 class AccountRepository(context: Context) {
@@ -86,55 +88,99 @@ class AccountRepository(context: Context) {
 
     private val db = AppDatabase.getInstance(context)
     private val transactionDao = db.transactionDao()
+
     suspend fun getTransactions(address: String, mainNet: Boolean): List<TransactionEntity> = withContext(Dispatchers.IO) {
-        val url = if (mainNet) {
-            "https://api.trongrid.io//v1/accounts/$address/transactions?only_confirmed=true"
-        } else {
-            "https://nile.trongrid.io/v1/accounts/$address/transactions?only_confirmed=true"
-        }
-        val request = Request.Builder().url(url).build()
-        val networkType = if (mainNet) "mainnet" else "testnet" // Define networkType once
+        val baseUrl = if (mainNet) "https://api.trongrid.io" else "https://nile.trongrid.io"
+        val networkType = if (mainNet) "mainnet" else "testnet"
+
+        val transactionUrl = "$baseUrl/v1/accounts/$address/transactions?only_confirmed=true"
+        val internalUrl = "$baseUrl/v1/accounts/$address/internal_transactions"
 
         try {
+            val request = Request.Builder().url(transactionUrl).build()
+            val internalRequest = Request.Builder().url(internalUrl).build()
+
+            val transactions = mutableListOf<TransactionEntity>()
+            val hexAddress = base58ToHex(address)
+
             client.newCall(request).execute().use { resp ->
-                if (!resp.isSuccessful) return@withContext transactionDao.getTransactionsByNetwork(networkType = networkType)
+                if (resp.isSuccessful) {
+                    val json = JSONObject(resp.body?.string().orEmpty())
+                    val arr = json.optJSONArray("data") ?: JSONArray()
 
-                val json = JSONObject(resp.body?.string().orEmpty())
-                val arr = json.optJSONArray("data") ?: return@withContext transactionDao.getTransactionsByNetwork(networkType)
+                    for (i in 0 until arr.length()) {
+                        val tx = arr.getJSONObject(i)
+                        val hash = tx.optString("txID", "")
+                        val timestamp = tx.optLong("block_timestamp", 0L)
+                        val raw = tx.optJSONObject("raw_data") ?: continue
+                        val contract = raw.optJSONArray("contract")?.optJSONObject(0)
+                        val param = contract?.optJSONObject("parameter")?.optJSONObject("value") ?: continue
+                        val value = param.optLong("amount", 0L)
+                        val toAddress = param.optString("to_address", "")
+                        val fromAddress = param.optString("owner_address", "")
 
-                val result = (0 until arr.length()).mapNotNull { i ->
-                    val tx = arr.getJSONObject(i)
-                    val hash = tx.optString("txID", "")
-                    val timestamp = tx.optLong("block_timestamp", 0L)
-                    val raw = tx.optJSONObject("raw_data") ?: return@mapNotNull null
-                    val contract = raw.optJSONArray("contract")?.optJSONObject(0)
-                    val param = contract?.optJSONObject("parameter")?.optJSONObject("value") ?: return@mapNotNull null
-                    val value = param.optLong("amount", 0L)
-                    val toAddress = param.optString("to_address", "")
-                    val fromAddress = param.optString("from_address", "")
-                    val isIncoming = toAddress == address
-                    TransactionEntity(
-                        hash = hash,
-                        amount = value,
-                        type = if (isIncoming) "outgoing" else "incoming",
-                        timestamp = timestamp,
-                        toAddress = toAddress,
-                        fromAddress = fromAddress,
-                        networkType = if (mainNet) "mainnet" else "testnet"
-                    )
+                        val isIncoming = toAddress.equals(hexAddress, ignoreCase = true)
+
+                        transactions.add(
+                            TransactionEntity(
+                                hash = hash,
+                                amount = value,
+                                type = if (isIncoming) "outgoing" else "incoming",
+                                timestamp = timestamp,
+                                toAddress = toAddress,
+                                fromAddress = fromAddress,
+                                networkType = networkType
+                            )
+                        )
+                    }
                 }
-                transactionDao.clearByNetwork(networkType)
-                transactionDao.insertAll(result)
-                return@withContext result
             }
+
+            client.newCall(internalRequest).execute().use { resp ->
+                if (resp.isSuccessful) {
+                    val json = JSONObject(resp.body?.string().orEmpty())
+                    val arr = json.optJSONArray("data") ?: JSONArray()
+
+                    for (i in 0 until arr.length()) {
+                        val tx = arr.getJSONObject(i)
+                        val hash = tx.optString("tx_id", "")
+                        val timestamp = tx.optLong("block_timestamp", 0L)
+                        val toAddress = tx.optString("to_address", "")
+                        val fromAddress = tx.optString("from_address", "")
+
+                        val isIncoming = toAddress.equals(hexAddress, ignoreCase = true)
+
+                        transactions.add(
+                            TransactionEntity(
+                                hash = hash,
+                                amount = 0L,
+                                type = if (isIncoming) "incoming" else "outgoing",
+                                timestamp = timestamp,
+                                toAddress = toAddress,
+                                fromAddress = fromAddress,
+                                networkType = networkType
+                            )
+                        )
+                    }
+                }
+            }
+
+            transactionDao.clearByNetwork(networkType)
+            transactionDao.insertAll(transactions)
+            return@withContext transactions
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             e.printStackTrace()
-
             return@withContext transactionDao.getAll()
         }
     }
+
+    private fun base58ToHex(address: String): String {
+        val decoded = Base58.decode(address)
+        return decoded.joinToString("") { "%02x".format(it) }
+    }
+
 
     suspend fun getLocalTransactions(): List<TransactionEntity> {
         return withContext(Dispatchers.IO) {

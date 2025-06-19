@@ -75,4 +75,7 @@ dependencies {
 //    room
     implementation(libs.androidx.room.runtime)
     kapt(libs.androidx.room.compiler)
+
+//    bitcoin
+    implementation(libs.bitcoinj.core)
 }
