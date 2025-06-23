@@ -78,4 +78,6 @@ dependencies {
 
 //    bitcoin
     implementation(libs.bitcoinj.core)
+//    haze
+    implementation("dev.chrisbanes.haze:haze-materials:1.6.4")
 }

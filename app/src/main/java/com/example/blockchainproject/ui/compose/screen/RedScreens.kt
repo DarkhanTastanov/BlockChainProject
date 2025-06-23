@@ -50,7 +50,7 @@ fun GlassRedButton(
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(12.dp)
-    val borderColor = SamsungColorScheme.primary
+    val borderColor = SamsungColorScheme.primary.copy(0.1f)
     val backgroundColor = if (selected) SamsungColorScheme.primary.copy(alpha = 0.2f)
     else SamsungColorScheme.onSurface.copy(alpha = 0.15f)
     val textColor = if (selected) SamsungColorScheme.primaryContainer
@@ -62,7 +62,7 @@ fun GlassRedButton(
                 alpha = if (enabled) 1f else 0.5f
             }
             .clip(shape)
-            .background(Color.Transparent)
+            .background(SamsungColorScheme.primary.copy(0.3f))
             .border(
                 width = 2.dp,
                 color = borderColor,
@@ -178,7 +178,7 @@ fun GlassCard(
             .background(Color.Transparent)
             .border(
                 width = 1.dp,
-                color = SamsungColorScheme.primary,
+                color = SamsungColorScheme.primary.copy(alpha = 0.1f),
                 shape = shape
             )
     ) {
@@ -187,7 +187,7 @@ fun GlassCard(
                 .matchParentSize()
                 .clip(shape)
                 .blur(12.dp)
-                .background(SamsungColorScheme.onBackground.copy(alpha = 0.07f))
+                .background(SamsungColorScheme.primary.copy(alpha = 0.3f))
         )
         Box(modifier = Modifier.padding(16.dp))
         CompositionLocalProvider(
@@ -200,20 +200,36 @@ fun GlassCard(
 
 @Composable
 fun NetworkToggle(isMainNet: Boolean, onToggle: () -> Unit) {
-    val backgroundColor = if (isMainNet) SamsungColorScheme.primary else SamsungColorScheme.onPrimary
-    val textColor = if (isMainNet) SamsungColorScheme.onPrimary else SamsungColorScheme.primary
+    val backgroundColor =
+        if (isMainNet) SamsungColorScheme.primary.copy(0.5f) else SamsungColorScheme.onPrimary.copy(
+            alpha = 0.1f
+        )
+    val textColor = SamsungColorScheme.primary
+
 
     Box(
         modifier = Modifier
-            .padding(8.dp)
-            .clip(RoundedCornerShape(50))
-            .background(backgroundColor)
-            .clickable { onToggle() }
-            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.Transparent)
+            .border(
+                width = 1.dp,
+                color = SamsungColorScheme.primary.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(12.dp)
+            )
     ) {
-        Text(
-            text = if (isMainNet) "MainNet" else "TestNet",
-            color = textColor
-        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(backgroundColor)
+                .clickable { onToggle() }
+                .padding(horizontal = 20.dp, vertical = 10.dp)
+        ) {
+            Text(
+                text = if (isMainNet) "MainNet" else "TestNet",
+                color = textColor
+            )
+        }
     }
+
 }
+

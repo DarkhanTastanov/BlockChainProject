@@ -2,35 +2,45 @@ package com.example.blockchainproject.ui.compose.navigation
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.blockchainproject.ui.compose.screen.*
+import dev.chrisbanes.haze.hazeChild
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.materials.HazeMaterials
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    val pageBackgroundColor = SamsungColorScheme.background
 
-    Scaffold(
-        bottomBar = {
-            if (currentRoute != "login") {
-                BottomNavigationBar(navController)
-            }
-        },
-        containerColor = pageBackgroundColor
-    ) { innerPadding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars)
+    ) {
         NavHost(
             navController = navController,
             startDestination = "login",
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 0.dp),
             enterTransition = { getEnterTransition(initialState, targetState) },
             exitTransition = { getExitTransition(initialState, targetState) },
             popEnterTransition = { getPopEnterTransition(initialState, targetState) },
@@ -60,7 +70,18 @@ fun AppNavigation() {
                 val address = it.arguments?.getString("address") ?: ""
                 TransactionDetailsScreen(hash, address)
             }
+        }
 
+        if (currentRoute != "login") {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 16.dp)
+                    .wrapContentHeight()
+
+            ) {
+                GlassBottomNavigationBar(navController)
+            }
         }
     }
 }

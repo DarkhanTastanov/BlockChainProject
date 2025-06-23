@@ -43,22 +43,15 @@ fun HistoryScreen(
         viewModel.loadTransactions()
     }
 
-//    Image(
-//        painter = painterResource(R.drawable.back),
-//        contentDescription = null,
-//        modifier = Modifier.fillMaxSize(),
-//        contentScale = ContentScale.Crop // or Fit, depending on your need
-//    )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 color = SamsungColorScheme.background
             )
-            .padding(16.dp)
+            .padding(top = 16.dp)
     ){
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()

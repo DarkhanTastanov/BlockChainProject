@@ -50,6 +50,7 @@ class TransactionDetailsViewModel(
     }
 
     private fun generateTransactionUrl(hash: String): String {
-        return "https://nile.tronscan.org/#/transaction/$hash"
+        val url = if (_isMainNet.value) "https://nile.tronscan.org/#/transaction/$hash" else "https://api.tronscan.org/#/transaction/$hash"
+        return url
     }
 }
