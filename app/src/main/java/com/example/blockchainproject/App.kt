@@ -10,6 +10,6 @@ class App : Application() {
         super.onCreate()
 
         val sharedPrefsHelper = SharedPrefsHelper(applicationContext)
-        NetworkModeManager.init(sharedPrefsHelper) // ✅ Safe initialization
+        NetworkModeManager.init(sharedPrefsHelper)
     }
 }
