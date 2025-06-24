@@ -12,14 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import com.example.blockchainproject.R
@@ -32,8 +29,6 @@ fun SplashScreen(onSplashFinished: () -> Unit) {
 
 @Composable
 fun LogoSplashAnimation(onFinish: () -> Unit) {
-    val scope = rememberCoroutineScope()
-
     var scale by remember { mutableFloatStateOf(0f) }
 
     val animatedScale by animateFloatAsState(
@@ -41,11 +36,13 @@ fun LogoSplashAnimation(onFinish: () -> Unit) {
         animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
     )
 
-
     LaunchedEffect(Unit) {
         scale = 1f
 
-        delay(1200)
+        delay(200)
+
+        delay(200)
+
         onFinish()
     }
 
@@ -65,6 +62,5 @@ fun LogoSplashAnimation(onFinish: () -> Unit) {
                     alpha = 1f
                 )
         )
-
     }
 }

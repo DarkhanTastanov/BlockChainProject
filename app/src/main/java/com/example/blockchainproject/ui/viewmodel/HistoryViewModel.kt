@@ -43,12 +43,10 @@ class HistoryViewModel(
                 val address = sharedPrefs.getSavedAddress()
                 if (address != null) {
                     val remote = repository.getTransactions(address, isMain)
-                    // **Crucially, create a new list instance:**
-                    _transactions.value = remote.toList() // Convert to a new list
+                    _transactions.value = remote.toList()
                 } else {
                     val local = repository.getLocalTransactionsByNetwork(netType)
-                    // **Crucially, create a new list instance:**
-                    _transactions.value = local.toList() // Convert to a new list
+                    _transactions.value = local.toList()
                 }
 
                 _isLoading.value = false
@@ -62,8 +60,7 @@ class HistoryViewModel(
             val currentNet = isMainNet.value
             val address = sharedPrefs.getSavedAddress() ?: return@launch
             val fresh = repository.getTransactions(address, currentNet)
-            // **Crucially, create a new list instance:**
-            _transactions.value = fresh.toList() // Convert to a new list
+            _transactions.value = fresh.toList()
             _isLoading.value = false
         }
     }
