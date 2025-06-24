@@ -1,6 +1,7 @@
 package com.example.blockchainproject.repository
 
 import android.content.Context
+import com.example.blockchainproject.R
 import com.example.blockchainproject.data.db.AppDatabase
 import com.example.blockchainproject.data.entity.AccountInfo
 import com.example.blockchainproject.data.entity.AccountRequest
@@ -18,7 +19,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class AccountRepository(context: Context) {
-
+    private val mainNetWalletURL = context.getString(R.string.main_net_wallet_url)
+    private val testNetWalletURL = context.getString(R.string.test_net_wallet_url)
+    private val mainNetAccountsURL = context.getString(R.string.main_net_accounts_url)
+    private val testNetAccountsURL = context.getString(R.string.test_net_accounts_url)
     private val client = OkHttpClient()
     private val gson = Gson()
     private val jsonMediaType = "application/json".toMediaType()
@@ -29,7 +33,7 @@ class AccountRepository(context: Context) {
             val requestBody = gson.toJson(accountRequest).toRequestBody(jsonMediaType)
 
             val request = Request.Builder()
-                .url("https://api.trongrid.io/wallet/getaccount")
+                .url(mainNetWalletURL)
                 .post(requestBody)
                 .addHeader("accept", "application/json")
                 .addHeader("content-type", "application/json")
@@ -54,9 +58,9 @@ class AccountRepository(context: Context) {
             val requestBody = gson.toJson(accountRequest).toRequestBody(jsonMediaType)
 
             val url = if (mainNet) {
-                "https://api.trongrid.io/wallet/getaccount"
+                mainNetWalletURL
             } else {
-                "https://nile.trongrid.io/wallet/getaccount"
+                testNetWalletURL
             }
 
             val request = Request.Builder()
@@ -90,11 +94,10 @@ class AccountRepository(context: Context) {
     private val transactionDao = db.transactionDao()
 
     suspend fun getTransactions(address: String, mainNet: Boolean): List<TransactionEntity> = withContext(Dispatchers.IO) {
-        val baseUrl = if (mainNet) "https://api.trongrid.io" else "https://nile.trongrid.io"
         val networkType = if (mainNet) "mainnet" else "testnet"
 
-        val transactionUrl = "$baseUrl/v1/accounts/$address/transactions?only_confirmed=true"
-        val internalUrl = "$baseUrl/v1/accounts/$address/internal_transactions"
+        val transactionUrl = "$mainNetAccountsURL/$address/transactions?only_confirmed=true"
+        val internalUrl = "$testNetAccountsURL/$address/internal_transactions"
 
         try {
             val request = Request.Builder().url(transactionUrl).build()

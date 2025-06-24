@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">BlockChainProject</string>
+    <string name="main_net_wallet_url">https://api.trongrid.io/wallet/getaccount</string>
+    <string name="test_net_wallet_url">https://nile.trongrid.io/wallet/getaccount</string>
+    <string name="main_net_accounts_url">https://api.trongrid.io/v1/accounts</string>
+    <string name="test_net_accounts_url">https://nile.trongrid.io/v1/accounts</string>
 </resources>
