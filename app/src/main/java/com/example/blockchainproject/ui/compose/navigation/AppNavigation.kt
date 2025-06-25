@@ -20,7 +20,7 @@ import androidx.navigation.navArgument
 import com.example.blockchainproject.ui.compose.screen.*
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(startDestination: String) {
     val navController = rememberNavController()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -31,14 +31,8 @@ fun AppNavigation() {
     ) {
         NavHost(
             navController = navController,
-            startDestination = "login",
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 0.dp),
-            enterTransition = { getEnterTransition(initialState, targetState) },
-            exitTransition = { getExitTransition(initialState, targetState) },
-            popEnterTransition = { getPopEnterTransition(initialState, targetState) },
-            popExitTransition = { getPopExitTransition(initialState, targetState) }
+            startDestination = startDestination,
+            modifier = Modifier.fillMaxSize()
         ) {
             composable("login") {
                 LoginScreen(navController)
@@ -72,7 +66,6 @@ fun AppNavigation() {
                     .align(Alignment.BottomCenter)
                     .padding(horizontal = 16.dp)
                     .wrapContentHeight()
-
             ) {
                 GlassBottomNavigationBar(navController)
             }

@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import com.example.blockchainproject.R
 import kotlinx.coroutines.delay
 
+
 @Composable
 fun SplashScreen(onSplashFinished: () -> Unit) {
     LogoSplashAnimation(onFinish = onSplashFinished)
@@ -33,16 +34,13 @@ fun LogoSplashAnimation(onFinish: () -> Unit) {
 
     val animatedScale by animateFloatAsState(
         targetValue = scale,
-        animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
+        animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+        label = "splashAnimation"
     )
 
     LaunchedEffect(Unit) {
         scale = 1f
-
-        delay(200)
-
-        delay(200)
-
+        delay(1500)
         onFinish()
     }
 
