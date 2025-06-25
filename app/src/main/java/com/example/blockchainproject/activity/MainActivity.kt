@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 _showCustomSplash.value = true
-                delay(500)
+                delay(1000)
                 _showCustomSplash.value = false
             }
         }
