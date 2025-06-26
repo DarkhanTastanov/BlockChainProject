@@ -47,7 +47,7 @@ fun TransactionDetailsScreen(hash: String, address: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(4.dp)
+            .padding(WindowInsets.systemBars.asPaddingValues().calculateTopPadding())
             .clip(RoundedCornerShape(12.dp))
             .background(baseGlassColor)
             .border(
