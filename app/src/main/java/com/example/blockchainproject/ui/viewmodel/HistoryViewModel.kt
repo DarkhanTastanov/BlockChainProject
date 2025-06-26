@@ -58,10 +58,16 @@ class HistoryViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             val currentNet = isMainNet.value
-            val address = sharedPrefs.getSavedAddress() ?: return@launch
-            val fresh = repository.getTransactions(address, currentNet)
-            _transactions.value = fresh.toList()
-            _isLoading.value = false
+            try {
+                val address = sharedPrefs.getSavedAddress() ?: return@launch
+                val fresh = repository.getTransactions(address, currentNet)
+                _transactions.value = fresh.toList()
+            } catch (e: Exception) {
+
+            } finally {
+                _isLoading.value = false
+            }
+
         }
     }
 
