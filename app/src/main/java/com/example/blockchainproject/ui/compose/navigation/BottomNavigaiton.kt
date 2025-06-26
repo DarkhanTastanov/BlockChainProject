@@ -32,83 +32,52 @@ import androidx.compose.ui.unit.dp
 import com.example.blockchainproject.ui.compose.screen.SamsungColorScheme
 
 @Composable
-fun GlassBottomNavigationBar(navController: NavHostController) {
+fun BottomNavigationRow(navController: NavHostController) {
     val items = listOf("home", "history")
     val icons = listOf(Icons.Default.Home, Icons.AutoMirrored.Filled.List)
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    Box(
+    Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .graphicsLayer {
-                shape = RoundedCornerShape(
-                    topStart = 16.dp,
-                    topEnd = 16.dp,
-                    bottomEnd = 16.dp,
-                    bottomStart = 16.dp
-                )
-                clip = true
-                shadowElevation = 8.dp.toPx()
-                alpha = 0.9f
-            }
-            .border(
-                width = 1.dp,
-                color = SamsungColorScheme.primary.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(
-                    topStart = 16.dp,
-                    topEnd = 16.dp,
-                    bottomEnd = 16.dp,
-                    bottomStart = 16.dp
+            .fillMaxSize(),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        items.forEachIndexed { index, screen ->
+            val selected = currentRoute == screen
+            val animatedScale by animateFloatAsState(
+                targetValue = if (selected) 2f else 1.2f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
                 )
             )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    SamsungColorScheme.primary.copy(alpha = 0.3f)
 
-                ),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            items.forEachIndexed { index, screen ->
-                val selected = currentRoute == screen
-                val animatedScale by animateFloatAsState(
-                    targetValue = if (selected) 2f else 1.2f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessLow
-                    )
-                )
-
-                Box(
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        if (currentRoute != screen) {
+                            navController.navigate(screen) {
+                                popUpTo(navController.graph.startDestinationId)
+                                launchSingleTop = true
+                            }
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icons[index],
+                    contentDescription = screen,
+                    tint = if (selected) SamsungColorScheme.primary else SamsungColorScheme.onBackground,
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .clickable {
-                            if (currentRoute != screen) {
-                                navController.navigate(screen) {
-                                    popUpTo(navController.graph.startDestinationId)
-                                    launchSingleTop = true
-                                }
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icons[index],
-                        contentDescription = screen,
-                        tint = if (selected) SamsungColorScheme.primary else SamsungColorScheme.onBackground,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .graphicsLayer {
-                                scaleX = animatedScale
-                                scaleY = animatedScale
-                            }
-                    )
-                }
+                        .size(24.dp)
+                        .graphicsLayer {
+                            scaleX = animatedScale
+                            scaleY = animatedScale
+                        }
+                )
             }
         }
     }
