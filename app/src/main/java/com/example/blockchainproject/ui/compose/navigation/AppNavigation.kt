@@ -47,7 +47,11 @@ fun AppNavigation(startDestination: String) {
             NavHost(
                 navController = navController,
                 startDestination = startDestination,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                enterTransition = { getEnterTransition(initialState, targetState) },
+                exitTransition = { getExitTransition(initialState, targetState) },
+                popEnterTransition = { getPopEnterTransition(initialState, targetState) },
+                popExitTransition = { getPopExitTransition(initialState, targetState) }
             ) {
                 composable("login") {
                     LoginScreen(navController)
