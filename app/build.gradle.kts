@@ -80,9 +80,9 @@ dependencies {
 //    bitcoin
     implementation(libs.bitcoinj.core)
 //    haze
-    implementation("dev.chrisbanes.haze:haze-materials:1.6.4")
+//    implementation("dev.chrisbanes.haze:haze-materials:1.6.4")
 //    lottie
-    implementation("com.airbnb.android:lottie:6.6.7")
+//    implementation("com.airbnb.android:lottie:6.6.7")
 //splashscreen
     implementation("androidx.core:core-splashscreen:1.0.1")
 }
